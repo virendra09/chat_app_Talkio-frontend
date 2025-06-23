@@ -2,13 +2,14 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom";
 
 
 //For local developemnt purpose.
 // const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-
+const navigate = useNavigate();
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
@@ -52,7 +53,7 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       toast.success("Logged in successfully");
-
+       
       get().connectSocket();
     } catch (error) {
       toast.error(error.response.data.message);
@@ -65,8 +66,10 @@ export const useAuthStore = create((set, get) => ({
     try {
       await axiosInstance.post("/auth/logout");
       set({ authUser: null });
-      toast.success("Logged out successfully");
       get().disconnectSocket();
+      toast.success("Logged out successfully");
+      
+      navigate("/login");
     } catch (error) {
       toast.error(error.response.data.message);
     }
